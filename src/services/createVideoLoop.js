@@ -5,7 +5,7 @@ import { exec } from 'child_process'
 
 const execAsync = promisify(exec)
 const FFMPEG = 'ffmpeg'
-const DEFAULT_DURATION_SECONDS = 7200 // 1 hour
+const DEFAULT_DURATION_SECONDS = 36000 // 1 hour
 
 function normalizeDurationSeconds(duration) {
   if (typeof duration === 'number' && Number.isFinite(duration))
