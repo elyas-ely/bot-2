@@ -1,157 +1,67 @@
-import { exec } from 'child_process'
-import { promisify } from 'util'
 import fs from 'fs'
 import path from 'path'
+import { promisify } from 'util'
+import { exec } from 'child_process'
 
 const execAsync = promisify(exec)
 const FFMPEG = 'ffmpeg'
-const FFPROBE = 'ffprobe'
-
-const DEFAULT_DURATION_SECONDS = 300 // 5 minutes
+const DEFAULT_DURATION_SECONDS = 3600 // 1 hour
 
 function normalizeDurationSeconds(duration) {
-  if (typeof duration === 'number' && Number.isFinite(duration)) {
+  if (typeof duration === 'number' && Number.isFinite(duration))
     return Math.max(1, duration)
-  }
-
   if (typeof duration === 'string') {
-    // Support HH:MM:SS, MM:SS, or seconds-only strings
     const parts = duration.split(':').map(Number)
-    if (parts.every((n) => Number.isFinite(n))) {
-      if (parts.length === 3) {
-        return parts[0] * 3600 + parts[1] * 60 + parts[2]
-      }
-      if (parts.length === 2) {
-        return parts[0] * 60 + parts[1]
-      }
-      if (parts.length === 1) {
-        return parts[0]
-      }
+    if (parts.every(Number.isFinite)) {
+      if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2]
+      if (parts.length === 2) return parts[0] * 60 + parts[1]
+      if (parts.length === 1) return parts[0]
     }
   }
-
   throw new Error('Invalid duration value provided.')
 }
 
-/**
- * Loops the source video (no audio) and music track to create a synced clip
- * of the requested length, avoiding re-encoding when possible.
- *
- * @param {number|string} duration - Desired clip length (seconds or HH:MM:SS).
- */
 export async function loopVideoWithMusic(duration = DEFAULT_DURATION_SECONDS) {
-  const videoPath = 'public/video/video.mp4'
-  const musicPath = 'public/audio/music.mp3'
-  const outputPath = 'public/final/output.mp4'
+  const videoPath = path.resolve('public/video/video.mp4')
+  const musicPath = path.resolve('public/audio/music.mp3')
+  const outputPath = path.resolve('public/final/output.mp4')
 
   const durationSeconds = normalizeDurationSeconds(duration)
 
+  // Ensure output folder exists
   const outputDir = path.dirname(outputPath)
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true })
-  }
+  if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true })
 
-  // const diagnostics = await collectDiagnostics({
-  //   videoPath,
-  //   musicPath,
-  //   durationSeconds,
-  // })
+  // Get video duration
+  const { stdout: videoDurationStdout } = await execAsync(
+    `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${videoPath}"`
+  )
+  const videoDuration = parseFloat(videoDurationStdout)
+  if (!videoDuration || isNaN(videoDuration))
+    throw new Error('Could not get video duration.')
 
+  const videoLoops = Math.ceil(durationSeconds / videoDuration)
+
+  console.log(
+    `⏳ Looping video (${videoDuration.toFixed(2)}s) and music to reach ${durationSeconds}s...`
+  )
+
+  // VPS-friendly FFmpeg command: copy video, encode audio only
   const ffmpegCmd = `${FFMPEG} -y \
-  -stream_loop -1 -i "${videoPath}" \
-  -stream_loop -1 -i "${musicPath}" \
-  -t ${durationSeconds} \
-  -map 0:v:0 -map 1:a:0 \
-  -c:v copy \
-  -c:a aac -b:a 192k \
-  -movflags +faststart \
-  "${outputPath}"`
-
-  console.log(`⏳ Creating ${durationSeconds}s video with looped music...`)
+    -stream_loop ${videoLoops - 1} -i "${videoPath}" \
+    -stream_loop -1 -i "${musicPath}" \
+    -t ${durationSeconds} \
+    -map 0:v -map 1:a \
+    -c:v copy -c:a aac -b:a 192k -movflags +faststart \
+    "${outputPath}"`
 
   try {
-    const { stdout, stderr } = await execAsync(ffmpegCmd)
-
-    // const outputDiagnostics = await collectDiagnostics({
-    //   outputPath,
-    // })
-    // if (outputDiagnostics.output) {
-    //   console.log(
-    //     `✅ Done! Output duration ≈ ${outputDiagnostics.output.duration.toFixed(
-    //       2
-    //     )}s (${outputPath})`
-    //   )
-    // } else {
-    //   console.log('✅ Done! File saved at:', outputPath)
-    // }
+    console.log('⏳ Creating final video with music (VPS-safe, low CPU)...')
+    await execAsync(ffmpegCmd)
+    console.log(`✅ Video created: ${outputPath}`)
     return outputPath
-  } catch (error) {
-    console.error('❌ FFmpeg failed:')
-    console.error(error)
-    throw error
+  } catch (err) {
+    console.error('❌ FFmpeg failed:', err)
+    throw err
   }
 }
-
-// async function collectDiagnostics({
-//   videoPath,
-//   musicPath,
-//   outputPath,
-//   durationSeconds,
-// }) {
-//   const results = {}
-//   if (videoPath) {
-//     results.video = await probeMedia(videoPath).catch(() => null)
-//   }
-//   if (musicPath) {
-//     results.audio = await probeMedia(musicPath).catch(() => null)
-//   }
-//   if (outputPath) {
-//     results.output = await probeMedia(outputPath).catch(() => null)
-//   }
-//   results.desiredDuration = durationSeconds
-//   return results
-// }
-
-// async function probeMedia(filePath) {
-//   if (!fs.existsSync(filePath)) {
-//     throw new Error(`Missing file: ${filePath}`)
-//   }
-
-//   const cmd = `${FFPROBE} -v error -select_streams v:0 -show_entries stream=duration -of json "${filePath}"`
-//   const audioCmd = `${FFPROBE} -v error -select_streams a:0 -show_entries stream=duration -of json "${filePath}"`
-
-//   let duration = null
-//   let type = 'unknown'
-
-//   try {
-//     const { stdout } = await execAsync(cmd)
-//     const parsed = JSON.parse(stdout)
-//     const streamDuration = parsed?.streams?.[0]?.duration
-//     if (streamDuration) {
-//       duration = Number(streamDuration)
-//       type = 'video'
-//     }
-//   } catch {
-//     // ignore, try audio probe
-//   }
-
-//   if (!duration) {
-//     try {
-//       const { stdout } = await execAsync(audioCmd)
-//       const parsed = JSON.parse(stdout)
-//       const streamDuration = parsed?.streams?.[0]?.duration
-//       if (streamDuration) {
-//         duration = Number(streamDuration)
-//         type = 'audio'
-//       }
-//     } catch {
-//       // ignore
-//     }
-//   }
-
-//   return {
-//     path: filePath,
-//     duration,
-//     type,
-//   }
-// }
