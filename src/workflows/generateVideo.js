@@ -34,8 +34,8 @@ export async function generateVideoWorkflow() {
   } catch (error) {
     console.error('Error generating video:', error)
   } finally {
-    // emptyChunksFolder()
-    // emptyImagesFolder()
-    // emptyFinalFolder()
+    emptyChunksFolder()
+    emptyImagesFolder()
+    emptyFinalFolder()
   }
 }
