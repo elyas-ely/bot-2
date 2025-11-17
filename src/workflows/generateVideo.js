@@ -1,14 +1,14 @@
-import { createVideoFromImages } from '../controllers/videoCreator.js'
-import { fetchImageUrls } from '../services/getImagesUrls.js'
-import { downloadImages } from '../services/imageDownloader.js'
-import { uploadVideo } from '../services/upload.js'
+// import { createVideoFromImages } from '../controllers/videoCreator.js'
+// import { fetchImageUrls } from '../services/getImagesUrls.js'
+// import { downloadImages } from '../services/imageDownloader.js'
+// import { uploadVideo } from '../services/upload.js'
 import { ensureProjectDirectories } from '../utils/ensureProjectDirectories.js'
 import {
   emptyChunksFolder,
   emptyImagesFolder,
   emptyFinalFolder,
 } from '../utils/cleanup.js'
-import { fetchAndDownloadMusic } from '../services/pixabayMusicService.js'
+// import { fetchAndDownloadMusic } from '../services/pixabayMusicService.js'
 import { loopVideoWithMusic } from '../services/createVideoLoop.js'
 
 export async function generateVideoWorkflow() {
