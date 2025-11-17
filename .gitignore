@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+
+images-copy/
+public/images/
+public/chunks/
+public/final/
+
+# Environment variables
+.env
+credentials.json
+token.json
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Testing
+coverage/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+
+# dockerfile
