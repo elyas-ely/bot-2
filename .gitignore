@@ -5,7 +5,7 @@ images-copy/
 public/images/
 public/chunks/
 public/final/
-public/video/
+# public/video/
 
 # Environment variables
 .env
