@@ -1,13 +1,17 @@
-import { GetObjectCommand } from '@aws-sdk/client-s3'
 import fs from 'fs'
 import path from 'path'
 import { r2 } from '../../config/r2.js'
 import { R2_BUCKET, STORAGE_PATHS } from '../../constants/storage.js'
+import { GetObjectCommand } from '@aws-sdk/client-s3'
 
-export async function downloadR2File(key) {
-  const outputDir = STORAGE_PATHS.downloads
+export async function downloadMusic(key) {
+  const downloadsDir = STORAGE_PATHS.downloadsMusic || 'public/downloads/music'
 
-  const outputPath = path.join(outputDir, key)
+  if (!fs.existsSync(downloadsDir)) {
+    fs.mkdirSync(downloadsDir, { recursive: true })
+  }
+
+  const outputPath = path.join(downloadsDir, path.basename(key))
 
   const res = await r2.send(
     new GetObjectCommand({

@@ -1,7 +1,14 @@
-export const R2_BUCKET = 'v-bot'
+export const R2_BUCKET = 'y-bot1'
 
 export const STORAGE_PATHS = {
-  videos: '',
-  downloads: './public/downloads/video',
-  processed: 'processed/',
+  videos: {
+    prefix: 'videos',
+    downloads: './public/downloads/video',
+    processed: 'processed/videos',
+  },
+  music: {
+    prefix: 'music',
+    downloads: './public/downloads/music',
+    processed: 'processed/music',
+  },
 }

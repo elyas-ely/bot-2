@@ -4,17 +4,6 @@ import { getVideoJob } from './jobs/startJob.js'
 
 const PORT = process.env.PORT || 7426
 
-async function runJob() {
-  try {
-    await getVideoJob()
-  } catch (err) {
-    console.error('❌ Workflow failed:', err)
-  }
-}
-
-// Run workflow once on server start
-runJob()
-
 serve({
   port: PORT,
   hostname: '0.0.0.0',
@@ -28,5 +17,14 @@ serve({
     })
   },
 })
-
 console.log(`🌐 Server running on http://localhost:${PORT}`)
+
+async function runJob() {
+  try {
+    await getVideoJob()
+  } catch (err) {
+    console.error('❌ Workflow failed:', err)
+  }
+}
+
+runJob()
