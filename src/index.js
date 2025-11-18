@@ -1,38 +1,19 @@
 import { serve } from 'bun'
-import { generateVideoWorkflow } from './workflows/generateVideo.js'
 import 'dotenv/config'
+import { getVideoJob } from './jobs/startJob.js'
 
 const PORT = process.env.PORT || 7426
 
-// Run workflow once when server starts
-async function runWorkflowWithTiming() {
-  const startTime = new Date()
-  console.log(`⏱️ Workflow started at: ${startTime.toLocaleString()}`)
-
+async function runJob() {
   try {
-    await generateVideoWorkflow()
-    const endTime = new Date()
-    console.log(`✅ Workflow completed at: ${endTime.toLocaleString()}`)
-
-    const durationMs = endTime - startTime
-    const totalSeconds = Math.floor(durationMs / 1000)
-    const hours = Math.floor(totalSeconds / 3600)
-    const minutes = Math.floor((totalSeconds % 3600) / 60)
-    const seconds = totalSeconds % 60
-
-    let timeString = ''
-    if (hours > 0) timeString += `${hours}h `
-    if (minutes > 0 || hours > 0) timeString += `${minutes}m `
-    timeString += `${seconds}s`
-
-    console.log(`⏳ Total time taken: ${timeString}`)
+    await getVideoJob()
   } catch (err) {
     console.error('❌ Workflow failed:', err)
   }
 }
 
 // Run workflow once on server start
-runWorkflowWithTiming()
+runJob()
 
 serve({
   port: PORT,

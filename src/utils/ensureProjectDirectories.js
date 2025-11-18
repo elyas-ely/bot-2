@@ -2,16 +2,18 @@ import fs from 'fs'
 
 export function ensureProjectDirectories() {
   const dirs = [
-    'public/images',
-    'public/chunks',
-    'public/audio',
+    'public/downloads/video',
+    'public/downloads/music',
+    'public/music',
+    'public/video',
     'public/final',
   ]
 
-  for (const dir of dirs) {
+  dirs.forEach((dir) => {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true })
-      console.log(`📁 Created directory: ${dir}`)
     }
-  }
+  })
+
+  console.log('📁 All project directories are ready')
 }

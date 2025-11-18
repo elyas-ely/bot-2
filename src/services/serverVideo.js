@@ -6,7 +6,9 @@ import { exec } from 'child_process'
 const execAsync = promisify(exec)
 const FFMPEG = 'ffmpeg'
 
-export async function serveVideo(inputVideo, outputVideo) {
+export async function serveVideo() {
+  const inputVideo = '/public/video/video.mp4'
+  const outputVideo = '/public/video/video.mp4'
   const inputPath = path.resolve(inputVideo)
   const outputPath = path.resolve(outputVideo)
 
