@@ -1,4 +1,5 @@
 export const R2_BUCKET = 'y-bot1'
+export const DEST_BUCKET = 'b-move-files'
 
 export const STORAGE_PATHS = {
   videos: {

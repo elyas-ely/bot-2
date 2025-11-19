@@ -1,8 +1,6 @@
 import { CopyObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import { r2 } from '../../config/r2.js'
-import { R2_BUCKET } from '../../constants/storage.js'
-
-const DEST_BUCKET = 'b-move-files'
+import { DEST_BUCKET, R2_BUCKET } from '../../constants/storage.js'
 
 export async function moveFileToSecondBucket(file) {
   const { key, type } = file
@@ -26,6 +24,6 @@ export async function moveFileToSecondBucket(file) {
     console.log('file moved and deleted')
   } catch (err) {
     console.error(err)
-    return null
+    throw err
   }
 }
