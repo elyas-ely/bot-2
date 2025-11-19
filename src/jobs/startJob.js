@@ -1,14 +1,13 @@
 import { emptyPublicFolder } from '../utils/cleanup.js'
 import { ensureProjectDirectories } from '../utils/ensureProjectDirectories.js'
-import { processMusic } from '../workers/processMusic.js'
-import { processNextVideo } from '../workers/processVideo.js'
+import { processNext } from '../workers/processNext.js'
 
 export async function getVideoJob() {
   try {
     ensureProjectDirectories()
 
-    // await processNextVideo()
-    await processMusic()
+    // // await processNext('videos')
+    // await processNext('musics')
   } catch (error) {
     console.log(error)
   } finally {

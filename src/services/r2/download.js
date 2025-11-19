@@ -4,10 +4,8 @@ import path from 'path'
 import { r2 } from '../../config/r2.js'
 import { R2_BUCKET, STORAGE_PATHS } from '../../constants/storage.js'
 
-export async function downloadR2File(key) {
-  const outputDir = STORAGE_PATHS.downloads
-
-  const outputPath = path.join(outputDir, key)
+export async function downloadR2File(outputDir, key) {
+  const outputPath = path.join(outputDir, path.basename(key))
 
   const res = await r2.send(
     new GetObjectCommand({

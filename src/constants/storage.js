@@ -6,9 +6,9 @@ export const STORAGE_PATHS = {
     downloads: './public/downloads/video',
     processed: 'processed/videos',
   },
-  music: {
-    prefix: 'music',
+  musics: {
+    prefix: 'musics',
     downloads: './public/downloads/music',
-    processed: 'processed/music',
+    processed: 'processed/musics',
   },
 }
