@@ -1,7 +1,5 @@
-import { error } from 'firebase-functions/logger'
 import { convertVideoToFullHD } from '../services/convertToFullHD.js'
 import { loopVideoWithMusic } from '../services/createVideoLoop.js'
-import { moveFileToSecondBucket } from '../services/r2/move.js'
 import { emptyPublicFolder } from '../utils/cleanup.js'
 import { ensureProjectDirectories } from '../utils/ensureProjectDirectories.js'
 import { startTimer, stopTimer } from '../utils/jobTimer.js'
