@@ -1,6 +1,5 @@
 import fs from 'fs'
 import { google } from 'googleapis'
-import readline from 'readline'
 import 'dotenv/config'
 
 const isProduction = process.env.NODE_ENV === 'production'
@@ -9,85 +8,39 @@ console.log('isProduction:', isProduction)
 const SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
 const TOKEN_PATH = isProduction ? '/app/token.json' : 'token.json'
 const VIDEO_FILE = 'public/final/output.mp4'
-
-const credentialsPath = isProduction
+const CREDENTIALS_PATH = isProduction
   ? '/app/credentials.json'
   : 'credentials.json'
 
-function persistTokens(oAuth2Client, token) {
+function createOAuthClient() {
+  const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH))
+  const { client_id, client_secret, redirect_uris } = credentials.installed
+  return new google.auth.OAuth2(client_id, client_secret, redirect_uris[0])
+}
+
+function loadTokens(oAuth2Client) {
+  if (!fs.existsSync(TOKEN_PATH))
+    throw new Error('token.json not found! Please authorize manually once.')
+  const token = JSON.parse(fs.readFileSync(TOKEN_PATH))
   oAuth2Client.setCredentials(token)
+
+  // Automatically save new access tokens when refreshed
   oAuth2Client.on('tokens', (newTokens) => {
     const updated = { ...token, ...newTokens }
     fs.writeFileSync(TOKEN_PATH, JSON.stringify(updated))
   })
-}
 
-async function promptForNewToken(oAuth2Client) {
-  const authUrl = oAuth2Client.generateAuthUrl({
-    access_type: 'offline',
-    scope: SCOPES,
-    prompt: 'consent',
-  })
-  console.log('Authorize this app by visiting this URL:\n', authUrl)
-
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  })
-  const code = await new Promise((resolve) =>
-    rl.question('Enter the code: ', (input) => {
-      rl.close()
-      resolve(input.trim())
-    })
-  )
-  const { tokens } = await oAuth2Client.getToken(code)
-  fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens))
-  persistTokens(oAuth2Client, tokens)
   return oAuth2Client
 }
 
-async function authorize() {
-  const credentials = JSON.parse(fs.readFileSync(credentialsPath))
-  const { client_secret, client_id, redirect_uris } = credentials.installed
-  const oAuth2Client = new google.auth.OAuth2(
-    client_id,
-    client_secret,
-    redirect_uris[0]
-  )
-
-  if (fs.existsSync(TOKEN_PATH)) {
-    try {
-      const token = JSON.parse(fs.readFileSync(TOKEN_PATH))
-      persistTokens(oAuth2Client, token)
-      // Force a refresh to verify stored credentials
-      await oAuth2Client.getAccessToken()
-      return oAuth2Client
-    } catch (err) {
-      const isInvalidGrant =
-        err?.message?.includes('invalid_grant') ||
-        err?.response?.data?.error === 'invalid_grant'
-
-      console.warn(
-        '⚠️ Existing OAuth token is invalid. Re-authentication required.'
-      )
-      if (isInvalidGrant && fs.existsSync(TOKEN_PATH)) {
-        fs.unlinkSync(TOKEN_PATH)
-      }
-      return promptForNewToken(oAuth2Client)
-    }
-  }
-
-  return promptForNewToken(oAuth2Client)
-}
-
-export async function uploadVideo() {
-  // return console.log('4 - video uploaded')
-
-  const auth = await authorize()
-  const youtube = google.youtube({ version: 'v3', auth })
+export async function uploadVideo(videoFile = VIDEO_FILE) {
+  const oAuth2Client = createOAuthClient()
 
   try {
-    console.log('uploading the video')
+    const auth = loadTokens(oAuth2Client)
+    const youtube = google.youtube({ version: 'v3', auth })
+
+    console.log('Uploading video:', videoFile)
 
     const res = await youtube.videos.insert({
       part: 'snippet,status',
@@ -99,7 +52,7 @@ export async function uploadVideo() {
         },
         status: { privacyStatus: 'unlisted' },
       },
-      media: { body: fs.createReadStream(VIDEO_FILE) },
+      media: { body: fs.createReadStream(videoFile) },
     })
 
     console.log('✅ Video uploaded successfully!')
@@ -107,7 +60,7 @@ export async function uploadVideo() {
       'YouTube URL:',
       `https://www.youtube.com/watch?v=${res.data.id}`
     )
-  } catch (error) {
-    console.error('Upload failed:', error)
+  } catch (err) {
+    console.error('Upload failed:', err)
   }
 }

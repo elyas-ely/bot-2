@@ -32,6 +32,6 @@ export async function getVideoJob() {
     console.log('❌ Video job failed:', error.message)
   } finally {
     stopTimer('Video Job')
-    // await emptyPublicFolder()
+    await emptyPublicFolder()
   }
 }
