@@ -14,7 +14,8 @@
     "child_process": "^1.0.2",
     "dotenv": "^16.6.1",
     "fs": "^0.0.1-security",
-    "googleapis": "^165.0.0"
+    "googleapis": "^165.0.0",
+    "timer-node": "^5.0.9"
   },
   "description": "",
   "keywords": [],
