@@ -24,7 +24,7 @@ export function stopTimer(label = 'Job') {
   const endTime = new Date()
   console.log(`✅ ${label} finished at: ${endTime.toLocaleString()}`)
   console.log(
-    `⏳ Total time taken: ${elapsed.h.toFixed(2)} h / ${elapsed.m.toFixed(2)} m / ${elapsed.s.toFixed(2)} s`
+    `⏳ Total time taken: ${elapsed.h} h / ${elapsed.m} m / ${elapsed.s} s`
   )
 
   // Reset

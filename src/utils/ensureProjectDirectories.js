@@ -4,7 +4,6 @@ export function ensureProjectDirectories() {
   const dirs = [
     'public/downloads/video',
     'public/downloads/music',
-    'public/music',
     'public/video',
     'public/final',
   ]

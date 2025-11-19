@@ -1,4 +1,3 @@
-// videoBot.js
 import fs from 'fs'
 import { google } from 'googleapis'
 import readline from 'readline'
@@ -9,32 +8,21 @@ console.log('isProduction:', isProduction)
 
 const SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
 const TOKEN_PATH = isProduction ? '/app/token.json' : 'token.json'
-const VIDEO_FILE = 'public/final/final_video.mp4'
+const VIDEO_FILE = 'public/final/output.mp4'
 
 const credentialsPath = isProduction
   ? '/app/credentials.json'
   : 'credentials.json'
 
-async function authorize() {
-  const credentials = JSON.parse(fs.readFileSync(credentialsPath))
-  const { client_secret, client_id, redirect_uris } = credentials.installed
-  const oAuth2Client = new google.auth.OAuth2(
-    client_id,
-    client_secret,
-    redirect_uris[0]
-  )
+function persistTokens(oAuth2Client, token) {
+  oAuth2Client.setCredentials(token)
+  oAuth2Client.on('tokens', (newTokens) => {
+    const updated = { ...token, ...newTokens }
+    fs.writeFileSync(TOKEN_PATH, JSON.stringify(updated))
+  })
+}
 
-  if (fs.existsSync(TOKEN_PATH)) {
-    const token = JSON.parse(fs.readFileSync(TOKEN_PATH))
-    oAuth2Client.setCredentials(token)
-    oAuth2Client.on('tokens', (newTokens) => {
-      if (newTokens.refresh_token) token.refresh_token = newTokens.refresh_token
-      token.access_token = newTokens.access_token
-      fs.writeFileSync(TOKEN_PATH, JSON.stringify(token))
-    })
-    return oAuth2Client
-  }
-
+async function promptForNewToken(oAuth2Client) {
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: SCOPES,
@@ -53,9 +41,43 @@ async function authorize() {
     })
   )
   const { tokens } = await oAuth2Client.getToken(code)
-  oAuth2Client.setCredentials(tokens)
   fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens))
+  persistTokens(oAuth2Client, tokens)
   return oAuth2Client
+}
+
+async function authorize() {
+  const credentials = JSON.parse(fs.readFileSync(credentialsPath))
+  const { client_secret, client_id, redirect_uris } = credentials.installed
+  const oAuth2Client = new google.auth.OAuth2(
+    client_id,
+    client_secret,
+    redirect_uris[0]
+  )
+
+  if (fs.existsSync(TOKEN_PATH)) {
+    try {
+      const token = JSON.parse(fs.readFileSync(TOKEN_PATH))
+      persistTokens(oAuth2Client, token)
+      // Force a refresh to verify stored credentials
+      await oAuth2Client.getAccessToken()
+      return oAuth2Client
+    } catch (err) {
+      const isInvalidGrant =
+        err?.message?.includes('invalid_grant') ||
+        err?.response?.data?.error === 'invalid_grant'
+
+      console.warn(
+        '⚠️ Existing OAuth token is invalid. Re-authentication required.'
+      )
+      if (isInvalidGrant && fs.existsSync(TOKEN_PATH)) {
+        fs.unlinkSync(TOKEN_PATH)
+      }
+      return promptForNewToken(oAuth2Client)
+    }
+  }
+
+  return promptForNewToken(oAuth2Client)
 }
 
 export async function uploadVideo() {

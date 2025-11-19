@@ -6,7 +6,8 @@ export async function processNext(type) {
   const config = STORAGE_PATHS[type]
 
   if (!config) {
-    throw new Error(`Invalid type: ${type}`)
+    console.error(`Invalid type: ${type}`)
+    return null
   }
 
   const outputDir = config.downloads
@@ -17,8 +18,7 @@ export async function processNext(type) {
 
     const oldest = await getOldestFile(prefix)
     if (!oldest) {
-      console.log(`❌ No ${type} found in R2.`)
-      return null
+      throw new Error(`❌ No ${type} found in R2.`)
     }
 
     const localPath = await downloadR2File(outputDir, oldest.Key)

@@ -5,7 +5,7 @@ import { exec } from 'child_process'
 
 const execAsync = promisify(exec)
 const FFMPEG = 'ffmpeg'
-const DEFAULT_DURATION_SECONDS = 600 // 1 hour
+const DEFAULT_DURATION_SECONDS = 60 // 1 hour
 
 function normalizeDurationSeconds(duration) {
   if (typeof duration === 'number' && Number.isFinite(duration))
@@ -23,7 +23,7 @@ function normalizeDurationSeconds(duration) {
 
 export async function loopVideoWithMusic(duration = DEFAULT_DURATION_SECONDS) {
   const videoPath = path.resolve('public/video/video.mp4')
-  const musicPath = path.resolve('public/music/music.mp3')
+  const musicPath = path.resolve('public/downloads/music/music.mp3')
   const outputPath = path.resolve('public/final/output.mp4')
 
   const durationSeconds = normalizeDurationSeconds(duration)
@@ -56,7 +56,7 @@ export async function loopVideoWithMusic(duration = DEFAULT_DURATION_SECONDS) {
     "${outputPath}"`
 
   try {
-    console.log('⏳ Creating final video with music (VPS-safe, low CPU)...')
+    console.log('⏳ Creating final video...')
     await execAsync(ffmpegCmd)
     console.log(`✅ Video created: ${outputPath}`)
     return outputPath
