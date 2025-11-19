@@ -3,17 +3,13 @@ import { loopVideoWithMusic } from '../services/createVideoLoop.js'
 import { moveFileToSecondBucket } from '../services/r2/move.js'
 import { emptyPublicFolder } from '../utils/cleanup.js'
 import { ensureProjectDirectories } from '../utils/ensureProjectDirectories.js'
+import { startTimer, stopTimer } from '../utils/jobTimer.js'
 import { processNext } from '../workers/processNext.js'
 import { Timer } from 'timer-node'
 
 export async function getVideoJob() {
   ensureProjectDirectories()
-
-  const startTime = new Date()
-  console.log(`⏱️ Video job started at: ${startTime.toLocaleString()}`)
-
-  const timer = new Timer({ label: 'Video Job' })
-  timer.start()
+  startTimer('Video Job')
 
   try {
     await loopVideoWithMusic()
@@ -28,12 +24,7 @@ export async function getVideoJob() {
   } catch (error) {
     console.error('❌ Video job failed:', error)
   } finally {
-    timer.stop()
-    const elapsed = timer.time()
-    console.log(
-      `⏳ Total time taken: ${elapsed.h.toFixed(2)} h / ${elapsed.m.toFixed(2)} m / ${elapsed.s.toFixed(2)} s`
-    )
-
+    stopTimer('Video Job')
     // Optional cleanup
     // await emptyPublicFolder()
   }
