@@ -23,7 +23,7 @@ function normalizeDurationSeconds(duration) {
 
 export async function loopVideoWithMusic(duration = DEFAULT_DURATION_SECONDS) {
   const videoPath = path.resolve('public/video/video.mp4')
-  const musicPath = path.resolve('public/audio/music.mp3')
+  const musicPath = path.resolve('public/music/music.mp3')
   const outputPath = path.resolve('public/final/output.mp4')
 
   const durationSeconds = normalizeDurationSeconds(duration)

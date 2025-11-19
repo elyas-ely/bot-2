@@ -1,4 +1,5 @@
 import { convertVideoToFullHD } from '../services/convertToFullHD.js'
+import { loopVideoWithMusic } from '../services/createVideoLoop.js'
 import { moveFileToSecondBucket } from '../services/r2/move.js'
 import { emptyPublicFolder } from '../utils/cleanup.js'
 import { ensureProjectDirectories } from '../utils/ensureProjectDirectories.js'
@@ -8,7 +9,8 @@ export async function getVideoJob() {
   try {
     ensureProjectDirectories()
 
-    await convertVideoToFullHD()
+    // await convertVideoToFullHD()
+    await loopVideoWithMusic()
 
     // const videoFile = await processNext('videos')
     // const musicFile = await processNext('musics')
