@@ -6,7 +6,9 @@ let startTime = null
 
 export function startTimer(label = 'Job') {
   startTime = new Date()
-  console.log(`⏱️ ${label} started at: ${startTime.toLocaleString()}`)
+  console.log(
+    `⏱️ --------------------------- ${label} started at: ${startTime.toLocaleString()}`
+  )
 
   currentTimer = new Timer({ label })
   currentTimer.start()
