@@ -41,7 +41,7 @@ async function runJob() {
 
 let counter = 0
 
-const job = new Cron('0 * * * *', () => {
+const job = new Cron('* * * * *', () => {
   // <-- every hour at minute 0
   counter++
   console.log(`Running job #${counter}`)
