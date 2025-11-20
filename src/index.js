@@ -53,3 +53,5 @@ const job = new Cron('0 * * * *', () => {
     job.stop()
   }
 })
+
+runJob()
