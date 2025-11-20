@@ -7,6 +7,8 @@ import { processNext } from '../workers/processNext.js'
 import { uploadVideo } from '../services/upload.js'
 
 export async function getVideoJob() {
+  await emptyPublicFolder()
+
   ensureProjectDirectories()
   startTimer('Video Job')
 
