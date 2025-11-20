@@ -25,7 +25,7 @@ export async function getVideoJob() {
     }
     await convertVideoToFullHD()
     await loopVideoWithMusic()
-    await uploadVideo()
+    // await uploadVideo()
     // await moveFileToSecondBucket(videoFile)
     // await moveFileToSecondBucket(musicFile)
   } catch (error) {

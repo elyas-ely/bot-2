@@ -5,6 +5,19 @@ export async function emptyPublicFolder() {
   const publicPath = 'public'
 
   try {
+    // Check if folder exists
+    await fs.access(publicPath)
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      console.log('ℹ️ public/ folder does not exist, nothing to clean')
+      return
+    } else {
+      console.error('❌ Error checking public folder:', err)
+      return
+    }
+  }
+
+  try {
     const entries = await fs.readdir(publicPath, { withFileTypes: true })
 
     await Promise.all(
