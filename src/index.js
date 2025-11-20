@@ -1,4 +1,5 @@
 import { serve } from 'bun'
+import { Cron } from 'croner'
 import 'dotenv/config'
 import { getVideoJob } from './jobs/startJob.js'
 
@@ -38,4 +39,17 @@ async function runJob() {
   }
 }
 
-runJob()
+let counter = 0
+
+const job = new Cron('0 * * * *', () => {
+  // <-- every hour at minute 0
+  counter++
+  console.log(`Running job #${counter}`)
+  runJob()
+
+  if (counter >= 5) {
+    // you probably meant 5 runs
+    console.log('✅ Completed 5 runs, stopping cron.')
+    job.stop()
+  }
+})

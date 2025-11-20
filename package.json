@@ -12,6 +12,7 @@
     "@types/ffmpeg-static": "^5.1.0",
     "axios": "^1.13.2",
     "child_process": "^1.0.2",
+    "croner": "^9.1.0",
     "dotenv": "^16.6.1",
     "fs": "^0.0.1-security",
     "googleapis": "^165.0.0",
