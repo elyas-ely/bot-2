@@ -17,6 +17,7 @@ export async function processNext(type) {
     console.log(`🔄 Processing ${type}...`)
 
     const oldest = await getOldestFile(prefix)
+
     if (!oldest) {
       throw new Error(`❌ No ${type} found in R2.`)
     }
