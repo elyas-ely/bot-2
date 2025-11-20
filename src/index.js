@@ -8,15 +8,26 @@ serve({
   port: PORT,
   hostname: '0.0.0.0',
   idleTimeout: 0,
+
   async fetch(req) {
-    if (new URL(req.url).pathname === '/') {
-      return new Response('✅ Video workflow already ran on server start!')
+    const url = new URL(req.url)
+
+    // 🩺 Healthcheck route
+    if (url.pathname === '/health') {
+      return new Response(
+        JSON.stringify({ status: 'ok', uptime: process.uptime() }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      )
     }
-    return new Response('🚀 Bot is running. Visit /generate to start.', {
-      headers: { 'Content-Type': 'text/plain' },
-    })
+
+    // No other routes
+    return new Response('Not found', { status: 404 })
   },
 })
+
 console.log(`🌐 Server running on http://localhost:${PORT}`)
 
 async function runJob() {
