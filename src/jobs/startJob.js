@@ -5,6 +5,7 @@ import { ensureProjectDirectories } from '../utils/ensureProjectDirectories.js'
 import { startTimer, stopTimer } from '../utils/jobTimer.js'
 import { processNext } from '../workers/processNext.js'
 import { uploadVideo } from '../services/upload.js'
+import { moveFileToSecondBucket } from '../services/r2/move.js'
 
 export async function getVideoJob() {
   await emptyPublicFolder()
