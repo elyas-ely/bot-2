@@ -22,7 +22,9 @@ export async function processNext(type) {
       throw new Error(`❌ No ${type} found in R2.`)
     }
 
-    const localPath = await downloadR2File(outputDir, oldest.Key)
+    const fileName = type === 'videos' ? 'video.mp4' : 'music.mp3'
+
+    const localPath = await downloadR2File(outputDir, fileName, oldest.Key)
 
     console.log(`✅ Downloaded ${type}:`, localPath)
 
