@@ -2,7 +2,7 @@ import { GetObjectCommand } from '@aws-sdk/client-s3'
 import fs from 'fs'
 import path from 'path'
 import { r2 } from '../../config/r2.js'
-import { R2_BUCKET, STORAGE_PATHS } from '../../constants/storage.js'
+import { R2_BUCKET } from '../../constants/storage.js'
 
 export async function downloadR2File(outputDir, key) {
   const outputPath = path.join(outputDir, path.basename(key))
